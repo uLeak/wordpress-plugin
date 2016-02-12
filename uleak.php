@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: ULeak Security Prevention Plugin
-Description: A Wordpress security plugin by Crossvault GmbH
-Author: dst
+Plugin Name: ULeak Security Plugin
+Description: A Wordpress security plugin by Crossvault GmbH. Our Wordpress Cleanup Plugin will help you to detect all possible malware on PHP and MySQL.
+Author: zephyrus1337
 Version: 1.0
 */
 @ini_set( 'max_execution_time', 180 );
@@ -170,15 +170,28 @@ function uleak_admin_page() {
 		}
 	}
 	echo '<h3>Security and Password Validation Plugin</h3><p>This plguin provides a malware scan to find all backdoor scripts and potential risks on your Wordpress installation. Log in to your ULeak API account and synchronize daily scanning results to your Uleak dashboard. You can find the daily synchronisation process in the Wordpress cron event schedular. We will send you also an email alert if a scanner finds an infected file. For support and system cleanups you also can contact our <a href="http://uleak.de/support" target="_blank">support</a> team. If you dont have a ULeak account see our pricing and sign up <a href="http://uleak.de/pricing">here</a>.</p>';
+	echo '<h3>WordPress Source Hashes</h3>';
 	if(isset($_GET['msg'])){
-		if($_GET['msg'] == 0){
-			echo '<p style="color:green;">Credentials successful updated.</p>';
-		}elseif($_GET['msg'] == 1){
-			echo '<p style="color:red;">Database error</p>';
+		if($_GET['msg'] == 2){
+			echo '<p style="color:green;">Successfully updated source hashes of your current WordPress version.</p>';
+		}elseif($_GET['msg'] == 3){
+			echo '<p style="color:red;">Update error. Check your folder permissions.</p>';
 		}
 	}
-	echo '<h3>API Credentials</h3>
+	echo '<p>Update the ULeak source files to the latest WordPress version. Find all your hashfiles in the plugin directory (wp-content/plugins/uleak-security-dashboard/hashes/).</p>
 		  <form action="'.admin_url("admin-post.php").'" method="post">
+		  <input type="hidden" name="action" value="update_sources">
+		  <input type="submit" class="button-primary" value="Update sources now" />
+		  </form><br /><br />';
+	echo '<h3>API Credentials</h3>';
+	if(isset($_GET['msg'])){
+		if($_GET['msg'] == 0){
+			echo '<p style="color:green;">Credentials successful tested.</p>';
+		}elseif($_GET['msg'] == 1){
+			echo '<p style="color:red;">Plugin connection error.</p>';
+		}
+	}
+	echo '<form action="'.admin_url("admin-post.php").'" method="post">
 		  <input type="hidden" name="action" value="add_apikey">';
 	if($data->status != 'OK'){
 		echo '<table class="form-table">
@@ -220,7 +233,44 @@ function uleak_admin_page() {
 	}
 	echo '</div>';
 }
+add_action( 'admin_post_update_sources', 'uleak_admin_update_sources' );
+function uleak_admin_update_sources() {
+	global $wp_version;
+	$latest = 'http://wordpress.org/latest.zip';
+	$file = 'latest.zip';
+	if ( ! is_readable( $file ) ) {
+		if ( ! copy( $latest, dirname(__FILE__) . '/hashes/' . $file ) ) {
+			$file_error = "No WordPress archive available and it could not be downloaded. Ensure the file is called 'latest.zip'.";
+		} else {
+			$download = true;
+			chdir( dirname(__FILE__) . '/hashes/' );
+		}
+	}
+	$hashes = '<?php' . "\r\n" . '$filehashes = array(' . "\r\n";
+	$zip = zip_open( getcwd() . '/' . $file );
+	if ( is_resource( $zip ) ) {
+		while ( $zip_entry = zip_read( $zip ) ) {
+			zip_entry_open( $zip, $zip_entry, 'r' );
+			$wp_file = zip_entry_read( $zip_entry, zip_entry_filesize( $zip_entry ) );
+			if ( substr( zip_entry_name( $zip_entry ), -1, 1 ) !== '/' && false === strstr( zip_entry_name( $zip_entry ), 'wp-content/plugins/' ) && false === strstr( zip_entry_name( $zip_entry ), 'wp-content/themes/' ) ) {
+				list( $wp, $filename ) = explode( '/', zip_entry_name( $zip_entry ), 2 );
+				$hashes .= "'" .  $filename . "' => '" . md5( $wp_file ) . "',\r\n";
+			}
+			zip_entry_close( $zip_entry );
+		}
+		zip_close( $zip );
+	}
+	$hashes .= ");\r\n?>";
+	if ( isset( $download ) && is_readable( getcwd() . '/' . $file ) ) {
+		unlink( dirname(__FILE__) . '/hashes/' . $file );
+	}
 
+	if(file_put_contents(dirname(__FILE__) . '/hashes/hashes-'.$wp_version.'.php', $hashes)){
+		wp_redirect(admin_url("tools.php?page=uleak&msg=2"));
+	}else{
+		wp_redirect(admin_url("tools.php?page=uleak&msg=3"));
+	}
+}
 add_action( 'admin_post_add_apikey', 'uleak_admin_add_apikey' );
 function uleak_admin_add_apikey() {
 	global $wpdb;
@@ -583,15 +633,6 @@ function uleak_hilight( $text ) {
 
 	return str_replace( array('$#$#','#$#$'), array('<span style="background:#ff0">','</span>'), $text );
 }
-/**
- * Wordpress Core Update hook.
- * Run Hash Generator.
- */
-add_action('core_upgrade_preamble', 'add_custom_upgrade_core_message');
-function add_custom_upgrade_core_message(){
-	file_get_contents(get_site_url().'/wp-content/plugins/wp-uleak/hashes/hashes-generator.php?wp_version='.$wp_version);
-	echo "<p>ULeak sources update completed.</p>";
-}
 
 /**
  * Activation callback.
@@ -599,7 +640,6 @@ function add_custom_upgrade_core_message(){
  */
 function uleak_activate() {
 	global $wpdb;
-	global $wp_version;
 	$db_customer = $wpdb->prefix . "uleak_customer";
 	$db_logger = $wpdb->prefix . "uleak_logger";
 	$db_users = $wpdb->prefix . "uleak_users";
@@ -644,7 +684,6 @@ function uleak_activate() {
 				'%d'
 			)
 		);
-		file_get_contents(get_site_url().'/wp-content/plugins/wp-uleak/hashes/hashes-generator.php?wp_version='.$wp_version);
 	}
 	//Use wp_next_scheduled to check if the event is already scheduled
 	$timestamp = wp_next_scheduled( 'uleak_create_daily_backup' );
