@@ -47,10 +47,36 @@ If you need additional help contact our support at http://uleak.de/support.
 == Frequently Asked Questions ==
 
 = Is ULeak free? =
-No! To use the core features of the plugin a ULeak membership is required. Get more details about our pricing here (http://uleak.de/pricing)
+No! To use the core features of the plugin a ULeak membership is required. Get more details about our pricing here (http://uleak.de/pricing). 
+
+= Can I get a Free Trial? =
+If you wish to trial the service simply sign up and if you are not happy with the results you can get a money back refund within 5 days of purchase.
+
+= Is the payment for a recurring subscription? =
+No you are not locked into any subscription. The Beginner, Pro and Expert membership lasts for 12 months and will expire if you do not chose to renew. A reminder email will be sent 14 days before expiry.
+
+= How does the payment system work? =
+Payment is via Credit Card or PayPal. There are No lock in contracts or subscriptions. Once payment is made you will be directed to a signup page where you enter your primary email; this will be used for the login and delivery of your scan results.
+
+= Can I upgrade or change plans? =
+Yes, we offer various upgrade options once you are subscribed. If you do not find the upgrade you're looking for, please submit a ticket and our support team will help.
+
+= Are there any additional taxes or fees? =
+There are no extra fees, no additional taxes, and no hidden costs. The price you see is the price that you pay. All of our prices are listed in USD, and the conversion will be automatically handled by Paypal.
+
+= Will the WordPress plugin remove malware from my website? =
+The ULeak Scanner Plugin for wordpress will audit and detect malware using a remote scanner. It does not remove malware, but does offer a path to the payload when available, and additional recommendations to help you get your website cleaned.
+
+= Do I have to do anything to activate the ULeak plugin? =
+It is just required to install and activate the plugin. A automated update will produced optimized on your wordpress version. Our plugin works as paid service an you have to register a membership subscription to activate the plugin by using an API key from your ULeak dashboard.
+
+= Do the WordPress plugins work with Multisite installations? =
+Yes! Multisite installations will need to use one installation of the plugin, which means all the sites will share the scanning results and leaked password information to your ULeak cloud.
+
+= How often are new features added? =
+We regularly maintain and update our extensions for compatibility and feature enhancements. You can subscribe to receive notifications of updates from the offical wordpress plugin repository (svn) or from github.
 
 = Interpreting the Results =
-
 It is possible that the scanner will find false positives (i.e. files which do not contain malicious code). If you are unsure feel welcome to ask our support (http://uleak.de/support/),
 You should be most concerned if the scanner is:
 * making matches around unknown external links
