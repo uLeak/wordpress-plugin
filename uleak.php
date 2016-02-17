@@ -37,9 +37,9 @@ function uleak_help_tabs() {
 		'title' => 'ULeak Support',
 		'content' => '<p><strong>Contact ULeak Support</strong></p>
 <ul>
-    <li><a href="http://uleak.de/support">ULeak: Support Contact</a></li>
-    <li><a href="http://uleak.de/login">ULeak: Login</a></li>
-    <li><a href="http://uleak.de/pricing">ULeak: Sign up</a></li>
+    <li><a href="https://uleak.de/support">ULeak: Support Contact</a></li>
+    <li><a href="https://uleak.de/login">ULeak: Login</a></li>
+    <li><a href="https://uleak.de/pricing">ULeak: Sign up</a></li>
 </ul>',
 	) );
 }
@@ -146,7 +146,7 @@ function uleak_admin_page() {
 		$scanner->run();
 	}
 	echo '<div class="wrap">';
-	echo '<a href="http://uleak.de" target="_blank"><img src="'.plugins_url( 'img/logo.png', __FILE__ ).'" alt="ULeak Logo" /></a>';
+	echo '<a href="https://uleak.de" target="_blank"><img src="'.plugins_url( 'img/logo.png', __FILE__ ).'" alt="ULeak Logo" /></a>';
 	$user_credentials = $wpdb->get_results( 'SELECT * FROM '.$wpdb->prefix ."uleak_customer".' WHERE id = 1');
 	foreach($user_credentials as $key => $row) {
 		$user['username'] = $row->username;
@@ -169,7 +169,7 @@ function uleak_admin_page() {
 			);
 		}
 	}
-	echo '<h3>Security and Password Validation Plugin</h3><p>This plguin provides a malware scan to find all backdoor scripts and potential risks on your Wordpress installation. Log in to your ULeak API account and synchronize daily scanning results to your Uleak dashboard. You can find the daily synchronisation process in the Wordpress cron event schedular. We will send you also an email alert if a scanner finds an infected file. For support and system cleanups you also can contact our <a href="http://uleak.de/support" target="_blank">support</a> team. If you dont have a ULeak account see our pricing and sign up <a href="http://uleak.de/pricing">here</a>.</p>';
+	echo '<h3>Security and Password Validation Plugin</h3><p>This plguin provides a malware scan to find all backdoor scripts and potential risks on your Wordpress installation. Log in to your ULeak API account and synchronize daily scanning results to your Uleak dashboard. You can find the daily synchronisation process in the Wordpress cron event schedular. We will send you also an email alert if a scanner finds an infected file. For support and system cleanups you also can contact our <a href="https://uleak.de/support" target="_blank">support</a> team. If you dont have a ULeak account see our pricing and sign up <a href="https://uleak.de/pricing">here</a>.</p>';
 	echo '<h3>WordPress Source Hashes</h3>';
 	if(isset($_GET['msg'])){
 		if($_GET['msg'] == 2){
@@ -209,7 +209,7 @@ function uleak_admin_page() {
 			</tr>
 			<tr>
 				<th scope="row"><label>ULeak API Key*: </label></th>
-				<td><input type="text" name="ul_apikey" placeholder="XXXXXXXXXXX" value="'.$user['apikey'].'"><span class="description">(Insert your ULeak API Key. Find your Credentials <a target="_blank" href="http://uleak.de/login">here</a>)</span></td>
+				<td><input type="text" name="ul_apikey" placeholder="XXXXXXXXXXX" value="'.$user['apikey'].'"><span class="description">(Insert your ULeak API Key. Find your Credentials <a target="_blank" href="https://uleak.de/login">here</a>)</span></td>
 			</tr>';
 	}
 	echo	'<tr>
@@ -1257,7 +1257,7 @@ function GetIP(){
 }
 
 function curl_helper_post($login, $transferData = false, $targetMethod = false, $portfolio_id = false){
-	$service_url = 'http://www.uleak.de/api/restful/'.$targetMethod;
+	$service_url = 'https://www.uleak.de/api/restful/'.$targetMethod;
 	$curl = curl_init($service_url);
 	$curl_post_data = array('id' => $login['apikey'], 'data' => json_encode($transferData), 'portfolio_id' => intval($portfolio_id), 'request_url' => site_url());
 	curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
