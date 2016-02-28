@@ -587,7 +587,7 @@ function uleak_list_logger() {
 	$user_ids = $wpdb->get_col( $wpdb->prepare("SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s", $level_key, '%administrator%') );
 	$index = 0;
 	foreach ( $user_ids as $id ) {
-		$result[$index] = $wpdb->get_results($wpdb->prepare("SELECT * FROM ".$wpdb->prefix.'uleak_users'." WHERE user_id = ".$id." ORDER BY valid_timestamp DESC LIMIT 1"));
+		$result[$index] = $wpdb->get_results($wpdb->prepare("SELECT * FROM ".$wpdb->prefix.'uleak_users'." WHERE user_id = %d ORDER BY valid_timestamp DESC LIMIT 1", $id));
 		$index++;
 	}
 	ob_start();
