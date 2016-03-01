@@ -1,11 +1,11 @@
-=== ULeak Security Dashboard by CrossVault ===
+=== ULeak Security Monitoring by CrossVault ===
 
-Contributors: dst
+Contributors: zephyrus1337
 Company link: http://uleak.de
-Tags: WordPress.com, uleak, malware, password, security, performance, backdoor, hacked, availability monitoring
-Stable tag: 4.3
-Requires at least: 4.3
-Tested up to: 4.4
+Tags: ULeak, malware monitoring, password security, cloud security, multi-website monitoring, hacked, availability monitoring, security monitoring
+Stable tag: 4.4.2
+Requires at least: 3.8
+Tested up to: 4.4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,8 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 ULeak is one of the best and most coherent cloud-based security scanner today. We aim to provide website owners the most concise security resource on the web and the best management tool for their projects.
 This plugin searches the files on your website, and the posts and comments tables of your database for anything suspicious. It also examines your list of active plugins for unusual filenames.
-This plugin is a scanning application that does not remove anything.
+This plugin is a scanning application that does not remove anything. It`s also just a additional feature of our regular services as website security provider especially for our WordPress users. 
+Find more details in our "How does it works" section on http://www.uleak.de.
 
 = Malware scan =
 
@@ -91,10 +92,11 @@ See http://www.uleak.de
 
 
 == Upgrade Notice ==
-
-Version 1.0
+Version 1.1
 
 == Changelog ==
-
 = 1.0 =
+First Beta Version
+= 1.1 =
+Added ULeak SECURE Seal
 Release date: May 1th, 2016

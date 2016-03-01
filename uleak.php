@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: ULeak Security Plugin
-Description: A Wordpress security plugin by Crossvault GmbH. Our Wordpress Cleanup Plugin will help you to detect all possible malware on PHP and MySQL.
+Plugin Name: ULeak Security Monitoring Plugin
+Description: A Wordpress security plugin by Crossvault GmbH. The ULeak Wordpress Security Monitoring Plugin will help you to detect all possible malware on PHP and MySQL.
 Author: zephyrus1337
-Version: 1.0
+Version: 1.1
 */
 @ini_set( 'max_execution_time', 180 );
 
@@ -128,6 +128,19 @@ function uleak_admin_scripts() { ?>
 	</script>
 	<?php
 }
+/**
+ * Intro Shortcode
+ */
+function uleak_shortcode( $atts, $content = null ) {
+	global $wpdb;
+	$user_credentials = $wpdb->get_results( 'SELECT * FROM '.$wpdb->prefix ."uleak_customer".' WHERE id = 1');
+	foreach($user_credentials as $key => $row) {
+		$portfolio_id = $row->portfolio_id;
+		$apikey = $row->apikey;
+	}
+	return '<a href="https://uleak.de/home/secure_web_certificate/'.$apikey.'/'.$portfolio_id.'" onclick="window.open(this.href, &quot;ULeak! Secure Website Certificate&quot;,&quot;left=20,top=20,width=800,height=730,toolbar=1,resizable=no&quot;); return false;"><img src="https://uleak.de/assets/global/img/uleak-cert.png" alt="ULeak Secure Seal" width="114px"></a>';
+}
+add_shortcode( 'uleak', 'uleak_shortcode' );
 
 /**
  * add_management_page callback
@@ -170,6 +183,9 @@ function uleak_admin_page() {
 		}
 	}
 	echo '<h3>Security and Password Validation Plugin</h3><p>This plguin provides a malware scan to find all backdoor scripts and potential risks on your Wordpress installation. Log in to your ULeak API account and synchronize daily scanning results to your Uleak dashboard. You can find the daily synchronisation process in the Wordpress cron event schedular. We will send you also an email alert if a scanner finds an infected file. For support and system cleanups you also can contact our <a href="https://uleak.de/support" target="_blank">support</a> team. If you dont have a ULeak account see our pricing and sign up <a href="https://uleak.de/pricing">here</a>.</p>';
+	echo '<h3>ULeak SECURE Seal - A Mark of Trust</h3>';
+	echo '<div style="float: left; margin-right: 30px;">'.do_shortcode('[uleak]').'</div>';
+	echo '<p>The ULeak SECURE Seal allows businesses of all sizes to scan their websites for the presence of malware, network and web application vulnerabilities, as well as SSL certificate validation and availability monitoring.<br />You can display the ULeak SECURE Seal to your customers to give them the peace of mind that your website is safe. Register your plugin and copy the Shortcode <code>[uleak]</code> on every page or as PHP in your theme <code>do_shortcode("[uleak]")</code>.</p><br />';
 	echo '<h3>WordPress Source Hashes</h3>';
 	if(isset($_GET['msg'])){
 		if($_GET['msg'] == 2){
@@ -182,7 +198,7 @@ function uleak_admin_page() {
 		  <form action="'.admin_url("admin-post.php").'" method="post">
 		  <input type="hidden" name="action" value="update_sources">
 		  <input type="submit" class="button-primary" value="Update sources now" />
-		  </form><br /><br />';
+		  </form><br /><hr /><br />';
 	echo '<h3>API Credentials</h3>';
 	if(isset($_GET['msg'])){
 		if($_GET['msg'] == 0){
@@ -647,8 +663,8 @@ function uleak_activate() {
 	{
 		$sql = "CREATE TABLE " . $db_customer . " (
 		`id` mediumint(9) NOT NULL AUTO_INCREMENT,
-		`username` varchar(44) NOT NULL,
-		`pwd` varchar(88) NOT NULL,
+		`username` varchar(88) NOT NULL,
+		`pwd` varchar(255) NOT NULL,
 		`apikey` varchar(88) NOT NULL,
 		`email` varchar(88) NOT NULL,
 		`portfolio_id` mediumint(22) NOT NULL,
