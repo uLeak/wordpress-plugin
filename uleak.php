@@ -1,9 +1,10 @@
 <?php
 /*
-Plugin Name: ULeak Security Monitoring Plugin
-Description: A Wordpress security plugin by Crossvault GmbH. The ULeak Wordpress Security Monitoring Plugin will help you to detect all possible malware on PHP and MySQL.
+Plugin Name: ULeak Security & Monitoring Plugin
+Description: A WordPress multi-website security plugin to find malware and potential risks. ULeak is a great tool to monitor the security of many WP installations in one central view. A new menu item called "ULeak Security" will be available under the Tools menu.
 Author: zephyrus1337
-Version: 1.1
+Text Domain: uleak-security-dashboard
+Version: 1.2
 */
 @ini_set( 'max_execution_time', 180 );
 
@@ -25,7 +26,7 @@ function uleak_help_tabs() {
 	$screen->add_help_tab( array(
 		'id' => 'interpreting-results',
 		'title' => 'Different Result Levels',
-		'content' => '<p><strong>Understanding the three different result levels</strong></p>
+		'content' => '<p><strong>Understanding the three different result levels</strong><br /><br />If the plugin is connected to a ULeak subscription all severe security risk will be collected and synchronised to your dashboard. </p>
 		<ul>
 			<li><strong>Severe:</strong> results that are often strong indicators of a hack (though they are not definitive proof). This critical results will synchronized to your ULeak dashboard and you get email alert notifications.</li>
 			<li><strong>Warning:</strong> these results are more commonly found in innocent circumstances than Severe matches, but they should still be treated with caution</li>
@@ -40,6 +41,7 @@ function uleak_help_tabs() {
     <li><a href="https://uleak.de/support">ULeak: Support Contact</a></li>
     <li><a href="https://uleak.de/login">ULeak: Login</a></li>
     <li><a href="https://uleak.de/pricing">ULeak: Sign up</a></li>
+    <li><a href="https://uleak.de/howitworks">ULeak: How it works</a></li>
 </ul>',
 	) );
 }
@@ -121,7 +123,7 @@ function uleak_admin_scripts() { ?>
 					}, success: function(r) {
 						jQuery('#scan-loader img').hide();
 						jQuery('#scan-loader span').html('Scan complete. Refresh the page to view the results.');
-						window.location.reload(false);
+						window.location = window.location.href + "&mal_scan=1";
 					}
 				});
 			};
@@ -147,6 +149,8 @@ add_shortcode( 'uleak', 'uleak_shortcode' );
  */
 function uleak_admin_page() {
 	global $wpdb;
+	$plugin_data = get_plugin_data( __FILE__ );
+	$plugin_version = $plugin_data['Version'];
 	// non-ajax scan form processing
 	if ( isset($_POST['action']) && 'scan' == $_POST['action'] ) {
 		check_admin_referer( 'uleak-scan_all' );
@@ -159,12 +163,11 @@ function uleak_admin_page() {
 		$scanner->run();
 	}
 	echo '<div class="wrap">';
-	echo '<a href="https://uleak.de" target="_blank"><img src="'.plugins_url( 'img/logo.png', __FILE__ ).'" alt="ULeak Logo" /></a>';
+	echo '<div><a href="https://uleak.de" target="_blank"><img src="'.plugins_url( 'img/logo.png', __FILE__ ).'" alt="ULeak Logo" /></a><br />Version: '.$plugin_version.' - Professional Multi-Website Security Monitoring</div>';
 	$user_credentials = $wpdb->get_results( 'SELECT * FROM '.$wpdb->prefix ."uleak_customer".' WHERE id = 1');
 	foreach($user_credentials as $key => $row) {
 		$user['username'] = $row->username;
 		$user['pwd'] = base64_decode($row->pwd);
-		$user['email'] = $row->email;
 		$user['apikey'] = $row->apikey;
 	}
 	if(!empty($user['pwd'])){
@@ -182,24 +185,17 @@ function uleak_admin_page() {
 			);
 		}
 	}
-	echo '<h3>Security and Password Validation Plugin</h3><p>This plguin provides a malware scan to find all backdoor scripts and potential risks on your Wordpress installation. Log in to your ULeak API account and synchronize daily scanning results to your Uleak dashboard. You can find the daily synchronisation process in the Wordpress cron event schedular. We will send you also an email alert if a scanner finds an infected file. For support and system cleanups you also can contact our <a href="https://uleak.de/support" target="_blank">support</a> team. If you dont have a ULeak account see our pricing and sign up <a href="https://uleak.de/pricing">here</a>.</p>';
+	echo '<div style="width: 45%; float: left; margin-bottom: 50px; margin-right: 50px;">';
+	echo '<h3>ULeak features and monitoring dashboard</h3><p>This plugin provides a malware scan to find backdoor scripts and potential risks on your Wordpress installation. For further monitoring options you can connect this plugin to the ULeak dashboard, especially if you are looking for a centralized monitoring facility for all your installations. For support and malware removal contact our <a href="https://uleak.de/support" target="_blank">team</a>.</p>';
+	echo '</div>';
+	echo '<div>';
 	echo '<h3>ULeak SECURE Seal - A Mark of Trust</h3>';
-	echo '<div style="float: left; margin-right: 30px;">'.do_shortcode('[uleak]').'</div>';
+	echo '<div style="float: left; margin-right: 30px; margin-bottom: 20px;">'.do_shortcode('[uleak]').'</div>';
 	echo '<p>The ULeak SECURE Seal allows businesses of all sizes to scan their websites for the presence of malware, network and web application vulnerabilities, as well as SSL certificate validation and availability monitoring.<br />You can display the ULeak SECURE Seal to your customers to give them the peace of mind that your website is safe. Register your plugin and copy the Shortcode <code>[uleak]</code> on every page or as PHP in your theme <code>do_shortcode("[uleak]")</code>.</p><br />';
-	echo '<h3>WordPress Source Hashes</h3>';
-	if(isset($_GET['msg'])){
-		if($_GET['msg'] == 2){
-			echo '<p style="color:green;">Successfully updated source hashes of your current WordPress version.</p>';
-		}elseif($_GET['msg'] == 3){
-			echo '<p style="color:red;">Update error. Check your folder permissions.</p>';
-		}
-	}
-	echo '<p>Update the ULeak source files to the latest WordPress version. Find all your hashfiles in the plugin directory (wp-content/plugins/uleak-security-dashboard/hashes/).</p>
-		  <form action="'.admin_url("admin-post.php").'" method="post">
-		  <input type="hidden" name="action" value="update_sources">
-		  <input type="submit" class="button-primary" value="Update sources now" />
-		  </form><br /><hr /><br />';
-	echo '<h3>API Credentials</h3>';
+	echo '</div>';
+	echo '<div style="width: 45%; float: left; margin-right: 50px;">';
+	echo '<h3>ULeak Subscription and API Credentials</h3>
+		  <p>Get a ULeak subscription to use our cloud synchronisation service. Monitor the plugin results of all your WP installations inside of your personal dashbaord.</p>';
 	if(isset($_GET['msg'])){
 		if($_GET['msg'] == 0){
 			echo '<p style="color:green;">Credentials successful tested.</p>';
@@ -217,21 +213,17 @@ function uleak_admin_page() {
 			</tr>
 			<tr>
 				<th scope="row"><label>ULeak Password*: </label></th>
-				<td><input type="password" name="ul_passwort" placeholder="Password""><span class="description">(Insert ULeak Password. This Password will <b>not</b> be saved in your WP-Database!)</span></td>
-			</tr>
-			<tr>
-				<th scope="row"><label>Email: </label></th>
-				<td><input type="text" name="ul_email" placeholder="your@mail.com" value="'.$user['email'].'"><span class="description">(Insert your Email Address for system notifications.)</span></td>
+				<td><input type="password" name="ul_passwort" placeholder="Password""><span class="description">(Insert ULeak Password.)</span></td>
 			</tr>
 			<tr>
 				<th scope="row"><label>ULeak API Key*: </label></th>
-				<td><input type="text" name="ul_apikey" placeholder="XXXXXXXXXXX" value="'.$user['apikey'].'"><span class="description">(Insert your ULeak API Key. Find your Credentials <a target="_blank" href="https://uleak.de/login">here</a>)</span></td>
+				<td><input type="text" name="ul_apikey" placeholder="XXXXXXXXXXX" value="'.$user['apikey'].'"><span class="description">(Insert your ULeak API Key. Find your Credentials in your profil settings <a target="_blank" href="https://uleak.de/profil">here</a>)</span></td>
 			</tr>';
 	}
 	echo	'<tr>
 				<th scope="row"><label>Connection Status: </label></th>
 				<td>';
-	if($data->status == 'OK'){ echo '<b style="color:green;">Connected</b>'; }else{ echo '<b style="color:red;">No access</b>'; }
+	if($data->status == 'OK'){ echo '<b style="color:green;">Connected</b><br /><span class="description">This website is now connected to your subscription on <a href="https://www.uleak.de" target="_blank">ULeak</a>. </span>'; }else{ echo '<b style="color:red;">No access</b><br /><span class="description">Get a subscription first. Contact our <a href="https://www.uleak.de/support" target="_blank">support</a> if you need any help with the plugin connection.</span>'; }
 	echo '</td></tr></table>';
 	if($data->status != 'OK'){
 		echo '<p><i>*Required fields</i></p>';
@@ -244,9 +236,24 @@ function uleak_admin_page() {
 		echo '<input type="submit" class="button-primary" value="Save API Credentials">';
 	}
 	echo '</form><br />';
-	if($data->status == 'OK'){
-		uleak_results_page();
+	echo '</div>';
+	echo '<div>';
+	echo '<h3>Update WordPress Source Files</h3>';
+	if(isset($_GET['msg'])){
+		if($_GET['msg'] == 2){
+			echo '<p style="color:green;">Successfully updated source hashes of your current WordPress version.</p>';
+		}elseif($_GET['msg'] == 3){
+			echo '<p style="color:red;">Update error. Check your folder permissions.</p>';
+		}
 	}
+	echo '<p>Update the ULeak source files to the latest WordPress version. Find all your hashfiles in the plugin directory (wp-content/plugins/uleak-security-dashboard/hashes/).</p>
+		  <form action="'.admin_url("admin-post.php").'" method="post">
+		  <input type="hidden" name="action" value="update_sources">
+		  <input type="submit" class="button-primary" value="Update sources now" />
+		  </form><br />';
+	echo '</div>';
+	echo '<br style="clear:both" />';
+	uleak_results_page();
 	echo '</div>';
 }
 add_action( 'admin_post_update_sources', 'uleak_admin_update_sources' );
@@ -297,21 +304,20 @@ function uleak_admin_add_apikey() {
 				'id' => 1,
 				'username' => trim($_POST['ul_username']),
 				'pwd' => base64_encode($_POST['ul_passwort']),
-				'apikey' => $_POST['ul_apikey'],
-				'email'=> $_POST['ul_email']
+				'apikey' => $_POST['ul_apikey']
 			)
 		);
 		if($result){
 			$login['username'] = trim($_POST['ul_username']);
 			$login['passwort'] = $_POST['ul_passwort'];
 			$login['apikey'] = $_POST['ul_apikey'];
-			$response = curl_helper_post($login, false, 'authenticate_api_user');
+			curl_helper_post($login, false, 'authenticate_api_user');
 			wp_redirect(admin_url("tools.php?page=uleak&msg=0"));
 		}else{
 			wp_redirect(admin_url("tools.php?page=uleak&msg=1"));
 		}
 	}else{
-		if($wpdb->replace($wpdb->prefix."uleak_customer", array('id' => 1, 'username' => '', 'pwd' => '', 'apikey' => '', 'email'=> ''))){
+		if($wpdb->replace($wpdb->prefix."uleak_customer", array('id' => 1, 'username' => '', 'pwd' => '', 'apikey' => '', 'portfolio_id'=> 0))){
 			$login['username'] = '';
 			$login['passwort'] = '';
 			$login['apikey'] = '';
@@ -329,15 +335,30 @@ function uleak_results_page() {
 	global $wp_version;
 	delete_transient( 'uleak_results_trans' );
 	delete_transient( 'uleak_files' );
-	$results = get_option( 'uleak_results' );
+	if(isset($_GET['mal_scan']) && $_GET['mal_scan'] == 1){
+		$results = get_option( 'uleak_results' );
+	}else{
+		$results = false;
+	}
 	?>
 	<hr />
-	<h3>ULeak Password Alerts</h3>
-	<p>ULeak provides a password validation service. This feature will check admin accounts passwords against our Leaked password repository. Our database is created on a regular basis and consists only of already cracked passwords that have been derived from public password-leaks and years of experience from working with hashcat. Furthermore we actively scan for new password leaks to include those to our collection. <br />Current listed passwords: <b>194459270</b></p>
+	<h3>Leaked Password Compliance</h3>
+	<p>ULeak provides a password compliance service. This feature will check admin accounts passwords against our Leaked password repository. Our database is created on a regular basis and consists only of already cracked passwords that have been derived from public password-leaks and years of experience from working with hashcat. Furthermore we actively scan for new password leaks to include those to our collection. <br />Current listed passwords: <b>194459270</b><br />All password request will be saved and listed in your ULeak monitoring dashboard. Find more about the pricing <a href="https://www.uleak.de/pricing" target="_blank">here</a>.</p>
 	<?php echo uleak_list_logger(); ?>
 	<hr />
-	<h3>Complete System Scan</h3>
-	<form action="<?php admin_url( 'tools.php?page=uleak' ); ?>" method="post">
+	<h3>Vulnerability Scan</h3>
+	<p>Check your Plugins and Themes for potential security risks and updates. The WP vulnerability database is provided by <a href="https://wpvulndb.com" target="_blank">https://wpvulndb.com</a>.</p>
+	<form action="<?= admin_url('tools.php?page=uleak&vul_scan=1'); ?>" method="post">
+		<p class="submit"><input type="submit" class="button-primary" value="Start Vulnerability Scan" /></p>
+	</form>
+	<?php if(isset($_GET['vul_scan']) && $_GET['vul_scan'] == 1){
+		echo uleak_plugin_version_logger();
+	}
+	?>
+	<hr />
+	<h3>Start Malware Scan</h3>
+	<p>Start a local malware scan on all your WP files and database tables. Configure the upper file size and the number of file batches on the scan.</p>
+	<form action="<?= admin_url('tools.php?page=uleak'); ?>" method="post">
 		<?php wp_nonce_field( 'uleak-scan_all' ); ?>
 		<input type="hidden" name="action" value="scan" />
 		<table class="form-table">
@@ -359,16 +380,14 @@ function uleak_results_page() {
 				</td>
 			</tr>
 		</table>
-		<p class="submit"><input type="submit" id="run-scanner" class="button-primary" value="Start Security Scan" /></p>
+		<p class="submit"><input type="submit" id="run-scanner" class="button-primary" value="Start Malware Scan" /></p>
 	</form>
 	<div id="scan-loader" style="display:none;margin:10px;padding:10px;background:#f7f7f7;border:1px solid #c6c6c6;text-align:center">
-		<p><strong>Searching your filesystem and database for possible exploit code</strong></p>
+		<p><strong>Searching your filesystem and database for possible exploit codes</strong></p>
 		<p><span style="margin-right:5px">Files scanned: 0...</span><img src="<?php echo plugins_url( 'img/loader.gif', __FILE__ ); ?>" height="16px" width="16px" alt="loading-icon" /></p>
 	</div>
 	<div id="scan-results">
-		<?php if ( ! $results ) : ?>
-			<h3>Results</h3><p>Nothing found.</p>
-		<?php else : uleak_show_results( $results ); endif; ?>
+		<?php if ($results){ uleak_show_results($results); }?>
 	</div>
 	<?php
 }
@@ -381,7 +400,7 @@ function uleak_show_results( $results ) {
 		echo 'Unfortunately the results appear to be malformed/corrupted. Try scanning again.';
 		return;
 	}
-	$result = '<h3>Results</h3><p>Level severe results are synchronized to your ULeak dashboard. To understand the three different result levels click the <button class="button">Help</button> on the top.</p>';
+	$result = '<p>Level severe results are synchronized to your ULeak dashboard. To understand the three different result levels click the <button class="button">Help</button> on the top.</p>';
 	foreach ( array('severe','warning','note') as $l ) {
 		if ( ! empty($results[$l]) ) {
 			if ( $l == 'note' ) $result .= '<div style="float:right;font-size:11px;margin-top:1.3em"><a href="#" id="hide-skipped" class="hide-if-no-js">Hide skipped files</a></div>';
@@ -592,6 +611,180 @@ function uleak_ajax_db_scan() {
 }
 add_action( 'wp_ajax_uleak_db_scan', 'uleak_ajax_db_scan' );
 
+function uleak_get_vulnerable_transfer_results(){
+	if (! function_exists('get_plugins' )) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
+	$all_themes = get_themes();
+	$all_plugins = get_plugins();
+	$plugin_names = [];
+	$theme_names = [];
+	$request_results = [];
+	$theme_request_results = [];
+	foreach($all_plugins as $key => $row){
+		if($row['TextDomain'] != '') {
+			array_push($plugin_names, array('textdomain' => $row['TextDomain'], 'version' => $row['Version']));
+		}
+	}
+	foreach($all_themes as $key => $row){
+		$theme = $row->get( 'TextDomain' );
+		$theme_v = $row->get( 'Version' );
+		if($theme != '') {
+			array_push($theme_names, array('textdomain' => $theme, 'version' => $theme_v));
+		}
+	}
+	foreach($plugin_names as $key => $value){
+		$curl = curl_init();
+		curl_setopt_array($curl, array(
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_URL => 'https://wpvulndb.com/api/v2/plugins/'.$value['textdomain']
+		));
+		$resp = curl_exec($curl);
+		curl_close($curl);
+		array_push($request_results, json_decode($resp));
+	}
+	foreach($theme_names as $key => $value){
+		$curl = curl_init();
+		curl_setopt_array($curl, array(
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_URL => 'https://wpvulndb.com/api/v2/themes/'.$value['textdomain']
+		));
+		$resp = curl_exec($curl);
+		curl_close($curl);
+		array_push($theme_request_results, json_decode($resp));
+	}
+	return array_merge($request_results, $theme_request_results);
+}
+
+function uleak_plugin_version_logger() {
+	if (! function_exists('get_plugins' )) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
+	$all_themes = get_themes();
+	$all_plugins = get_plugins();
+	$plugin_names = [];
+	$theme_names = [];
+	$request_results = [];
+	$theme_request_results = [];
+	foreach($all_plugins as $key => $row){
+		if($row['TextDomain'] != '') {
+			array_push($plugin_names, array('textdomain' => $row['TextDomain'], 'version' => $row['Version']));
+		}
+	}
+	foreach($all_themes as $key => $row){
+		$theme = $row->get( 'TextDomain' );
+		$theme_v = $row->get( 'Version' );
+		if($theme != '') {
+			array_push($theme_names, array('textdomain' => $theme, 'version' => $theme_v));
+		}
+	}
+	foreach($plugin_names as $key => $value){
+		$curl = curl_init();
+		curl_setopt_array($curl, array(
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_URL => 'https://wpvulndb.com/api/v2/plugins/'.$value['textdomain']
+		));
+		$resp = curl_exec($curl);
+		curl_close($curl);
+		array_push($request_results, json_decode($resp));
+	}
+	foreach($theme_names as $key => $value){
+		$curl = curl_init();
+		curl_setopt_array($curl, array(
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_URL => 'https://wpvulndb.com/api/v2/themes/'.$value['textdomain']
+		));
+		$resp = curl_exec($curl);
+		curl_close($curl);
+		array_push($theme_request_results, json_decode($resp));
+	}
+	ob_start();
+	?>
+	<table class="widefat">
+		<thead>
+		<tr>
+			<th scope="col">Plugin name</th>
+			<th scope="col">Installed version</th>
+			<th scope="col">Risk count</th>
+			<th scope="col">Update status</th>
+			<th scope="col" width="50%">Found items</th>
+		</tr>
+		</thead>
+		<tbody>
+		<?php
+		foreach($request_results as $key => $item){
+			$textdomain = $plugin_names[$key]['textdomain'];
+			if($plugin_names[$key]['version'] != $item->{$textdomain}->latest_version){
+				echo "<tr>";
+				echo "<td>".$plugin_names[$key]['textdomain']."</td>";
+				echo "<td>".$plugin_names[$key]['version']."</td>";
+				echo "<td>".count($item->{$textdomain}->vulnerabilities)."</td>";
+				echo "<td style='color:red'>Updates available</td>";
+				echo "<td>";
+				foreach($item->{$textdomain}->vulnerabilities as $vul){
+					echo "<p>";
+					echo '<span><b>'.$vul->title.'</b></span> | ';
+					echo "<span>Type: ".$vul->vuln_type."</span> | ";
+					echo "<span>Fixed in: ".$vul->fixed_in."</span> | ";
+					$links = '';
+					foreach($vul->references->url as $key => $url){
+						$links .= '<a href="'.$url.'" target="_blank" title="'.$url.'">link_'.$key.'</a> ';
+					}
+					echo "<span>Source: ".$links."</span>";
+					echo "</p>";
+				}
+				echo "</td>";
+				echo "</tr>";
+			}
+		}
+		?>
+		</tbody>
+	</table>
+	<table class="widefat">
+		<thead>
+		<tr>
+			<th scope="col">Theme name</th>
+			<th scope="col">Installed version</th>
+			<th scope="col">Risk count</th>
+			<th scope="col">Update status</th>
+			<th scope="col" width="50%">Found items</th>
+		</tr>
+		</thead>
+		<tbody>
+		<?php
+		foreach($theme_request_results as $key => $item){
+			$textdomain = $theme_names[$key]['textdomain'];
+			if($theme_names[$key]['version'] != $item->{$textdomain}->latest_version){
+				echo "<tr>";
+				echo "<td>".$theme_names[$key]['textdomain']."</td>";
+				echo "<td>".$theme_names[$key]['version']."</td>";
+				echo "<td>".count($item->{$textdomain}->vulnerabilities)."</td>";
+				echo "<td style='color:red'>Updates available</td>";
+				echo "<td>";
+				foreach($item->{$textdomain}->vulnerabilities as $vul){
+					echo "<p>";
+					echo '<span><b>'.$vul->title.'</b></span> | ';
+					echo "<span>Type: ".$vul->vuln_type."</span> | ";
+					echo "<span>Fixed in: ".$vul->fixed_in."</span> | ";
+					$links = '';
+					foreach($vul->references->url as $key => $url){
+						$links .= '<a href="'.$url.'" target="_blank" title="'.$url.'">link_'.$key.'</a> ';
+					}
+					echo "<span>Source: ".$links."</span>";
+					echo "</p>";
+				}
+				echo "</td>";
+				echo "</tr>";
+			}
+		}
+		?>
+		</tbody>
+	</table>
+	<br />
+	<?php
+	$admin_table = ob_get_clean();
+	return $admin_table;
+}
 function uleak_list_logger() {
 	global $wpdb;
 
@@ -608,7 +801,7 @@ function uleak_list_logger() {
 	}
 	ob_start();
 	?>
-	<table class="widefat">
+	<table class="widefat fixed">
 		<thead>
 		<tr>
 			<th scope="col">Username</th>
@@ -666,7 +859,6 @@ function uleak_activate() {
 		`username` varchar(88) NOT NULL,
 		`pwd` varchar(255) NOT NULL,
 		`apikey` varchar(88) NOT NULL,
-		`email` varchar(88) NOT NULL,
 		`portfolio_id` mediumint(22) NOT NULL,
 		UNIQUE KEY id (id)
 		);CREATE TABLE " . $db_logger . " (
@@ -690,7 +882,6 @@ function uleak_activate() {
 				'username' => '',
 				'pwd' => '',
 				'apikey' => '',
-				'email' => '',
 				'portfolio_id' => 0
 			),
 			array(
@@ -732,9 +923,11 @@ function uleak_create_backup(){
 		$login['apikey'] = $row->apikey;
 		$portfolio_id = $row->portfolio_id;
 	}
-	$response = curl_helper_post($login, $results['severe'], 'malware_result_transfer', $portfolio_id);
-	if($response->status == 'OK'){
-		// transfer to uleak dashboard done
+	if($login['username'] != '' AND $login['apikey'] != '' AND intval($portfolio_id)){
+		$malware_results = $results['severe'];
+		$vulnerable_results = uleak_get_vulnerable_transfer_results();
+		curl_helper_post($login, $malware_results, 'malware_result_transfer', $portfolio_id);
+		curl_helper_post($login, $vulnerable_results, 'vulnerable_result_transfer', $portfolio_id);
 	}
 
 }
@@ -1228,34 +1421,38 @@ add_action( 'wp_login_failed', 'action_wp_login_failed', 10, 1 );
 
 function uleak_validate_password($user, $password, $api_key, $portfolio_id){
 	global $wpdb;
-	if($api_key != '' && $portfolio_id != 0){
+	$password = md5($password);
+	if($portfolio_id == 0){
+		$json = file_get_contents('https://www.uleak.de/cv/checkmd5.pl?checkmd5='.$password.'&apikey=be3d4bd4ff50282921ef1f1512201fdc&pid=1');
+		$result = intval(json_decode($json));
+	}else{
 		$json = file_get_contents('https://www.uleak.de/cv/checkmd5.pl?checkmd5='.$password.'&apikey='.$api_key.'&pid='.$portfolio_id);
 		$result = intval(json_decode($json));
-		$wpdb->insert(
-			$wpdb->prefix."uleak_users",
-			array(
-				'user_id' => $user->ID,
-				'pw_status' => $result,
-				'valid_timestamp' => time()
-			),
-			array(
-				'%d',
-				'%d',
-				'%s'
-			)
+	}
+	$wpdb->insert(
+		$wpdb->prefix."uleak_users",
+		array(
+			'user_id' => $user->ID,
+			'pw_status' => $result,
+			'valid_timestamp' => time()
+		),
+		array(
+			'%d',
+			'%d',
+			'%s'
+		)
+	);
+	if($result == 1){
+		$text = "<html><body><p>Hello ".$user->user_nicename.",<br /> your account password was found in a leaked repository. Improve your security and reset your password <a href='".get_site_url()."/wp-login.php'>here.</a><br />This message was send from your WordPress installation at <a href='".get_site_url()."'>".get_site_url()."</a></p></body></html>";
+		$textadmin = "<html><body><p>Hello Admin,<br /> a password of an administrator account (".$user->user_nicename.") was found in a leaked repository. Improve your security and reset this password. A email notification was send to ".$user->user_nicename." - ".$user->user_email.".<br />This message was send from your WordPress installation at <a href='".get_site_url()."'>".get_site_url()."</a></p></body></html>";
+		$headers = array(
+			'From: WP-ULeak Password Service <'.get_option('admin_email').'>',
+			"Content-Type: text/html"
 		);
-		if($result == 1){
-			// Email text
-			$text = "<html><body><p>Hello ".$user->user_nicename.",<br /> your account password was found in a leaked repository. Improve your security and reset your password <a href='".get_site_url()."/wp-login.php'>here.</a><br />This message was send automatically from your wordpress installation at <a href='".get_site_url()."'>".get_site_url()."</a></p></body></html>";
-			// Email headers
-			$headers = array(
-				'From: WP-ULeak Password Service <'.get_settings('admin_email').'>',
-				"Content-Type: text/html"
-			);
-			$h = implode("\r\n",$headers) . "\r\n";
-			// Send email
-			wp_mail($user->user_email, 'ULeak Password Alert', $text, $h);
-		}
+		$h = implode("\r\n",$headers) . "\r\n";
+		// Send emails
+		wp_mail($user->user_email, 'ULeak Password Alert', $text, $h);
+		wp_mail(get_option('admin_email'), 'ULeak Password Alert', $textadmin, $h);
 	}
 }
 add_action('validate_user_password', 'uleak_validate_password', 10, 4);
@@ -1296,5 +1493,7 @@ function curl_helper_post($login, $transferData = false, $targetMethod = false, 
 	}
 	return $decoded;
 }
+
+
 
 

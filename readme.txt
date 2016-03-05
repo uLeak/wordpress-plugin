@@ -1,4 +1,4 @@
-=== ULeak Security Monitoring by CrossVault ===
+=== ULeak Security & Monitoring Plugin ===
 
 Contributors: zephyrus1337
 Company link: http://uleak.de
@@ -48,7 +48,7 @@ If you need additional help contact our support at http://uleak.de/support.
 == Frequently Asked Questions ==
 
 = Is ULeak free? =
-No! To use the core features of the plugin a ULeak membership is required. Get more details about our pricing here (http://uleak.de/pricing). 
+No! To use the core features of the plugin a ULeak membership is required. Get more details about our pricing here (http://uleak.de/pricing).
 
 = Can I get a Free Trial? =
 If you wish to trial the service simply sign up and if you are not happy with the results you can get a money back refund within 5 days of purchase.
@@ -88,7 +88,7 @@ You should be most concerned if the scanner is:
 
 == Screenshots ==
 
-See http://www.uleak.de
+See https://www.uleak.de
 
 
 == Upgrade Notice ==
@@ -100,3 +100,7 @@ First Beta Version
 = 1.1 =
 Added ULeak SECURE Seal
 Release date: May 1th, 2016
+= 1.2 =
+Import of vulnerability scan
+Public access to services without subscriptions
+Free features and password compliance api
